@@ -116,16 +116,18 @@ predict(result3, newdata, level =0.95, interval = "prediction")[3]
 #do the CI and PI make sense?
 #subset data and find basic statistics of diamonds that fall in the chosen "average categories"
 data_average <- data2[which(cut2 == "Good" & color2 == "Colorless" & carat == 1 & clarity2 == "Slightly dectable"),]
-mean(data_average$price) #$4,971.56, so model isn't accurate. FItted price is 2x as much as average price of diamonds with these characteristics
+mean(data_average$price) #$4,971.56, so model isn't accurate. Fitted price is 2x as much as average price of diamonds with these characteristics
 
 #check linear assumptions
 boxcox(result3, lambda = seq(0.3,0.4,0.01)) #lambda 1 is not included
 
 #transformation on response variable
 price_trans <- price^(1/3)
-result_trans <- lm(price_trans~cut2+color2+carat+clarity2)
 
 #refit regression equation with transformed response
+result_trans <- lm(price_trans~cut2+color2+carat+clarity2)
+
+#check that interval contains lambda 1 (if it does then variance is constant)
 boxcox(result_trans, lambda = seq(0.9,1.1,0.1)) #lambda 1 is now included in interval
 
 #summary results
@@ -155,6 +157,7 @@ data2$price_trans <- price_trans
 #recall newdata
 predict(result_trans, newdata, level =0.95, interval = "confidence")
 
+#cube the values because transformation on the response variable was a cubed root
 #lower bound: 15.75 --> 15.75^3 = 3,909.25
 predict(result_trans, newdata, level =0.95, interval = "confidence")[2]^3
 #upper bound: 16.19 --> 16.19^3 = 4,243.14 
@@ -162,6 +165,7 @@ predict(result_trans, newdata, level =0.95, interval = "confidence")[3]^3
 #fit: 15.97 --> 15.96^3 = 4,073.91 
 predict(result_trans, newdata, level =0.95, interval = "confidence")[1]^3
 
+#cube the values because transformation on the response variable was a cubed root
 #PI for diamond with average characteristics
 predict(result_trans, newdata, level =0.95, interval = "prediction")
 #fit: 15.97 --> 15.97^3 = 4,073.91 
@@ -223,7 +227,7 @@ legend("topleft", c("Colorless","Near-colorless"), lty=c(1,2), pch=c(1,12), col=
 #we don't expect there to be interactions between the 4Cs and two of the predictors confirm our suspicions
 #therefore, not fitting model for interactions
 """
-#SUBSET DATA TO REFLECT AVERAGE CUSTOMER
+#SUBSET DATA TO REFLECT AVERAGE CUSTOMER. ASSUMING AVERAGE CUSTOMER WILL NOT EXCEED $30K FOR DIAMOND
 #subset data to reflect a population closer to the average consumer
 data_sub <- data2[which(data2$price < 30000),]
 
@@ -258,7 +262,7 @@ sum(anova(result_sub)[2]) #SST
 #check for constant variance for subsetted model (no trans)
 boxcox(result_sub, lambda = seq(0.2,0.4,0.01)) #lambda 1 is not included
 
-#refit subsetted data with transformed price
+#refit subsetted data with transformed price. FINAL MODEL FOR SUBSET DATA (AVERAGE CONSUMER)
 result_sub_trans <- lm(data_sub$price_trans~data_sub$cut2+data_sub$color2+data_sub$carat+data_sub$clarity2)
 summary(result_sub_trans)
 sum(anova(result_sub_trans)[2]) #SST
@@ -312,6 +316,7 @@ summary(result_sub_trans2)
 newdata_sub <- data.frame(C1 = "Good", C2 = "Colorless", C3 = 1, C4 = "Slightly dectable")
 predict(result_sub_trans2, newdata_sub, level = 0.95, interval = "confidence")
 
+#cube the values because transformation on the response variable was a cubed root
 #lower bound: $4,230.68
 predict(result_sub_trans2, newdata_sub, level = 0.95, interval = "confidence")[2]^3
 #upper bound:$4,468.66
@@ -319,8 +324,11 @@ predict(result_sub_trans2, newdata_sub, level = 0.95, interval = "confidence")[3
 #fit: $4,348.58
 predict(result_sub_trans2, newdata_sub, level = 0.95, interval = "confidence")[1]^3
 
+
 #PI for diamond with average characteristics
 predict(result_sub_trans2, newdata_sub, level =0.95, interval = "prediction")
+
+#cube the values because transformation on the response variable was a cubed root
 #fit: $4,348.58
 predict(result_sub_trans2, newdata_sub, level =0.95, interval = "prediction")[1]^3
 #lower: $2,640.15
