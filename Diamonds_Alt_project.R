@@ -8,6 +8,10 @@
 library(MASS) #for boxplot or ACF (can't remember which)
 library(lawstat) #for levene.test()
 library(multcomp) #for pairise, glht
+library(tidyverse)
+library(ggplot2)
+library(dplyr)
+library(gridExtra)
 
 #load dataset
 data2 <- read.csv("diamonds4.csv", header = TRUE, sep = ",")
@@ -15,10 +19,28 @@ attach(data2)
 
 #easy attach and detach calls
 #entire diamonds dataset
-attach(data2)
-detach(data2)
-attach(data_sub)
-detach(data_sub)
+#attach(data2)
+#detach(data2)
+#attach(data_sub)
+#detach(data_sub)
+
+#general stats of dataset
+min(price)
+max(price)
+mean(price)
+median(price)
+median(carat)
+mode(color)
+#par(mfrow=c(2,2))
+#bar plot cut
+ggplot(data = data2) + geom_bar(mapping = aes(x = cut))+ggtitle("Figure 1: Bar Plot of Diamond Cut")
+#bar plot color
+ggplot(data = data2) + geom_bar(mapping = aes(x = color))+ggtitle("Figure 2: Bar Plot of Diamond Color")
+#bar plot clarity
+ggplot(data = data2) + geom_bar(mapping = aes(x = clarity))+ggtitle("Figure 3: Bar Plot of Diamond Clarity")
+#histogram carat
+ggplot(data = data2)+geom_histogram(mapping = aes(x=carat), binwidth = 0.5)+ggtitle("Figure 4: Histogram of Diamond Carat")
+#part(mfrow=c(1,1))
 
 #fit regression model. First-order. No collapsed variables
 result_F_alt <- lm(price~cut+color+carat+clarity)
@@ -124,7 +146,7 @@ boxcox(result3, lambda = seq(0.3,0.4,0.01)) #lambda 1 is not included
 #transformation on response variable
 price_trans <- price^(1/3)
 
-#refit regression equation with transformed response
+#refit regression equation with transformed response. PRICING MODEL THAT ANSWERS question 2 OF PROJECT. 
 result_trans <- lm(price_trans~cut2+color2+carat+clarity2)
 
 #check that interval contains lambda 1 (if it does then variance is constant)
@@ -152,6 +174,13 @@ qqline(result_trans$residuals)
 
 #add transformed price to data2
 data2$price_trans <- price_trans
+
+#fit regression equation without collapsing but with transformation on response. ANSWERS question 1 OF PROJECT.
+
+#run summary statistics and anova
+
+#check regression assumptions
+
 
 #fit data for average diamond characteristics
 #recall newdata
